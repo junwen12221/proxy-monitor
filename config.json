@@ -1,0 +1,5 @@
+{
+  "sourcePort": 8066,
+  "targetPort": 3306,
+  "targetHost": "localhost"
+}
