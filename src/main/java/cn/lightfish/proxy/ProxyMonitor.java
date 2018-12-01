@@ -11,28 +11,36 @@ import io.vertx.core.net.NetServer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * cjw
+ * 294712221@qq.com
+ */
 public class ProxyMonitor extends AbstractVerticle {
     private int sourcePort = 8066;
     private int targetPort = 3306;
-
-    public ProxyMonitor(int sourcePort, int targetPort, String targetHost) {
+    public NetworkTrafficRecorder recorder;
+    public MySQLD mySQLD;
+    public ProxyMonitor(int sourcePort, int targetPort, String targetHost,
+                        NetworkTrafficRecorder recorder) {
         this.sourcePort = sourcePort;
         this.targetPort = targetPort;
         this.targetHost = targetHost;
         this.connection = connection;
+        this.recorder = recorder;
     }
 
     private String targetHost = "localhost";
     private static final Logger logger = LoggerFactory.getLogger(ProxyMonitor.class);
     ProxyConnection connection;
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         String s = new String(Files.readAllBytes(Paths.get("config.json").toAbsolutePath()));
         JsonObject jsonObject = new JsonObject(s);
+        NetworkTrafficRecorder recorder = new NetworkTrafficRecorder();
         Vertx.vertx().deployVerticle(new ProxyMonitor(
                 jsonObject.getInteger("sourcePort"),
                 jsonObject.getInteger("targetPort"),
-                jsonObject.getString("targetHost")
+                jsonObject.getString("targetHost"), recorder
         ));
     }
 
@@ -46,10 +54,9 @@ public class ProxyMonitor extends AbstractVerticle {
     public void start() throws Exception {
         NetServer netServer = vertx.createNetServer();
         NetClient netClient = vertx.createNetClient();
-        NetworkTrafficRecorder recorder = new NetworkTrafficRecorder();
         netServer.connectHandler(socket -> netClient.connect(targetPort, targetHost, result -> {
             if (result.succeeded()) {
-                connection = new ProxyConnection(socket, result.result(), recorder);
+                connection = new ProxyConnection(socket, result.result(),this);
                 afterStart();
             } else {
                 logger.error(result.cause().getMessage(), result.cause());
