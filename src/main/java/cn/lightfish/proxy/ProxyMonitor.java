@@ -19,7 +19,6 @@ public class ProxyMonitor extends AbstractVerticle {
     private int sourcePort = 8066;
     private int targetPort = 3306;
     public NetworkTrafficRecorder recorder;
-    public MySQLD mySQLD;
     public ProxyMonitor(int sourcePort, int targetPort, String targetHost,
                         NetworkTrafficRecorder recorder) {
         this.sourcePort = sourcePort;
