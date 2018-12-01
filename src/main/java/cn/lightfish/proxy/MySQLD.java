@@ -10,19 +10,26 @@ import java.util.Scanner;
  * 294712221@qq.com
  */
 public class MySQLD {
-    ProxyConnection connection;
+    ProxyMonitor ProxyMonitor;
     private static final Logger logger = LoggerFactory.getLogger(MySQLD.class);
-    public MySQLD(ProxyConnection connection) {
-        this.connection = connection;
+    public MySQLD(ProxyMonitor ProxyMonitor) {
+        this.ProxyMonitor = ProxyMonitor;
+    }
+
+    public void inactive() {
         try (Scanner scanner = new Scanner(System.in)) {
             scanner.useDelimiter(";");
             while (scanner.hasNextLine()) {
                 String cmd = scanner.next();
+                if (ProxyMonitor.connection==null){
+                    logger.error("请使用源客户端建立mysql客户端连接!!!!");
+                    continue;
+                }
                 switch (cmd) {
                     default:
-                        connection.setClient(this);
+                        ProxyMonitor.connection.setClient(this);
                         sendSQL(cmd);
-                        connection.setClient(null);
+                        ProxyMonitor. connection.setClient(null);
                 }
 
             }
@@ -42,7 +49,7 @@ public class MySQLD {
         buffer.appendUnsignedByte(packetId);
         buffer.appendUnsignedByte(com_query);
         buffer.appendBytes(bytes);
-        connection.sendBuffer2Server(buffer);
+        ProxyMonitor.connection.sendBuffer2Server(buffer);
     }
 
     public void writeFixInt(io.vertx.core.buffer.Buffer buffer, int length, long val) {

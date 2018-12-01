@@ -36,7 +36,7 @@ public class ProxyConnection {
         });
         serverSocket.handler(buffer -> {
             try {
-                record(Direction.SERVER_2_CLUENT, buffer);
+                record(Direction.SERVER_2_CLIENT, buffer);
                 if (mySQLD == null)
                     clientSocket.write(buffer);
                 else
